@@ -5,15 +5,16 @@ services:
     container_name: home-cams
     restart: unless-stopped
     env_file: .env
-    # Inside the container it always listens on 0.0.0.0:3001 (overrides env_file).
+    # Inside the container it listens on 0.0.0.0:PORT. HOST must stay 0.0.0.0 here (overrides
+    # env_file): with 127.0.0.1 Docker can't forward traffic into the container.
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
-      PORT: 3001
+      PORT: ${PORT:-5178}
     # HOST and PORT from .env: host address and port where the app is published.
-    # Defaults to 127.0.0.1:3001 (only reachable from the server, behind an HTTPS proxy).
+    # Defaults to 127.0.0.1:5178 (only reachable from the server, behind an HTTPS proxy).
     ports:
-      - "${HOST:-127.0.0.1}:${PORT:-3001}:3001"
+      - "${HOST:-127.0.0.1}:${PORT:-5178}:${PORT:-5178}"
     volumes:
       - wyze-token:/app/.wyze
 

@@ -51,19 +51,19 @@ npm run dev     # http://localhost:5173
 
 ```bash
 npm run build
-npm start       # http://127.0.0.1:3001 (HOST:PORT del .env)
+npm start       # http://127.0.0.1:5178 (HOST:PORT del .env)
 ```
 
 ## Ejecutar con Docker
 
 ```bash
 npm run docker:up     # construye la imagen y levanta el contenedor
-npm run docker:logs   # logs en vivo; debe decir "API en http://0.0.0.0:3001"
+npm run docker:logs   # logs en vivo; debe decir "API en http://0.0.0.0:5178"
 npm run docker:down   # detiene el contenedor
 ```
 
-La app queda en `http://HOST:PORT` del `.env` (por defecto http://127.0.0.1:3001). Si `npm run dev`
-está corriendo, usa otro puerto: `PORT=3002 npm run docker:up`.
+La app queda en `http://HOST:PORT` del `.env` (por defecto http://127.0.0.1:5178). Si `npm run dev`
+está corriendo, usa otro puerto: `PORT=5179 npm run docker:up`.
 
 El token de Wyze se guarda en el volumen `home-cams_wyze-token`, así que reiniciar no fuerza un login nuevo.
 
