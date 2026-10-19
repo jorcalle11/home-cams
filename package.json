@@ -1,0 +1,28 @@
+{
+  "name": "home-cams",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c blue,green \"node --watch --env-file=.env server/index.js\" \"vite\"",
+    "build": "vite build",
+    "start": "NODE_ENV=production node --env-file=.env server/index.js",
+    "check": "node --env-file=.env server/check.js",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "engines": {
+    "node": ">=20 <24.18"
+  },
+  "dependencies": {
+    "express": "^4.22.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "wyze-api": "^1.1.15"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "concurrently": "^9.2.5",
+    "vite": "^5.4.21"
+  }
+}

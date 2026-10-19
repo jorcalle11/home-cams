@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.wyze/
+
+# Secrets: only the templates are tracked
+.env
+.env.*
+!.env.example
+download/.env
+
+.DS_Store
+*.log

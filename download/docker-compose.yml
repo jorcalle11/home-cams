@@ -1,0 +1,28 @@
+# Wyze camera viewer: live WebRTC video/audio, events by day, groups, power control.
+# Production install — pulls the published image only (no git clone, no local build).
+# Configure via .env (see .env.example).
+
+name: home-cams
+
+services:
+  home-cams:
+    image: ghcr.io/jorcalle11/home-cams:latest
+    container_name: home-cams
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+    ports:
+      - "${HOST:-127.0.0.1}:${PORT:-3001}:${PORT:-3001}"
+    volumes:
+      # Wyze auth token, so restarts don't force a new login (Wyze rate-limits logins).
+      # Named volume: inherits the image's ownership (container runs as uid 1000).
+      - wyze-token:/app/.wyze
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  wyze-token:
