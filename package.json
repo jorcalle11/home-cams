@@ -1,6 +1,7 @@
 {
   "name": "home-cams",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n api,web -c blue,green \"node --watch --env-file=.env server/index.js\" \"vite\"",

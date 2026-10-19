@@ -70,7 +70,7 @@ El token de Wyze se guarda en el volumen `home-cams_wyze-token`, así que reinic
 ## Despliegue en un servidor
 
 El workflow `.github/workflows/docker-image.yml` publica la imagen en `ghcr.io/jorcalle11/home-cams`
-en cada push a `main` (`:latest`) y en cada tag `v*.*.*`. La carpeta [`download/`](download/) tiene lo
+en cada push a `main` (`:latest`) y en cada tag `v*.*.*`. La imagen es pública (`docker pull` sin login). La carpeta [`download/`](download/) tiene lo
 necesario para ejecutarla en el servidor desde el registry.
 
 ## Filtros en la URL
@@ -97,3 +97,7 @@ necesario para ejecutarla en el servidor desde el registry.
 - La API de Wyze no es oficial ni está documentada; puede cambiar sin aviso.
 - Los clips de video de los eventos solo existen con Cam Plus; sin él, solo hay imagen.
 - Las grabaciones de la tarjeta SD no son accesibles por la API.
+
+## Licencia
+
+[MIT](LICENSE)
