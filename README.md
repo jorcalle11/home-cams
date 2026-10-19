@@ -3,6 +3,15 @@
 Visor web para cámaras Wyze (Cam v3, Cam Pan v3): video y audio en vivo por WebRTC, eventos por día,
 grupos de la app de Wyze, capturas y encendido/apagado (modo privacidad).
 
+## ¿Por qué?
+
+Wyze tiene una versión web oficial para ver las cámaras, pero requiere una suscripción: la versión
+gratuita solo permite ver una cámara. Home Cams es una alternativa web self-hosted para ver **todas**
+las cámaras de la cuenta desde el navegador, sin suscripción.
+
+Usa la misma cuenta y la misma nube de Wyze (sin firmware modificado, sin RTSP, sin abrir puertos), y
+el video va directo del navegador a Wyze sin pasar por el servidor.
+
 ## Requisitos
 
 - Cuenta Wyze con **Key ID** y **API Key** generados en https://developer-api-console.wyze.com
