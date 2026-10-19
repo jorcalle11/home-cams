@@ -31,7 +31,7 @@ Completa en `.env`:
 |---|---|
 | `WYZE_EMAIL`, `WYZE_PASSWORD` | Cuenta Wyze |
 | `WYZE_KEY_ID`, `WYZE_API_KEY` | Credenciales de la API de Wyze |
-| `HOST`, `PORT` | Dónde escucha la app (por defecto `127.0.0.1:3001`) |
+| `HOST`, `PORT` | Dónde escucha la app (por defecto `127.0.0.1:5178`) |
 | `APP_USERNAME`, `APP_PASSWORD` | Login de la app. Obligatorio en producción y en Docker |
 
 ## Ejecutar sin Docker
