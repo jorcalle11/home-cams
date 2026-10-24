@@ -45,7 +45,7 @@ Las claves se gestionan con el login de la app (`APP_USERNAME` / `APP_PASSWORD`)
 
 ```bash
 # Crear una clave (se muestra una sola vez; el servidor solo guarda su hash)
-curl -u admin:… -H 'Content-Type: application/json' -d '{"name":"TV sala"}' http://127.0.0.1:5178/api/keys
+curl -u admin:… -H 'Content-Type: application/json' -d '{"name":"LG TV 60UQ8050PSB"}' http://127.0.0.1:5178/api/keys
 # Clientes: último uso, IP, user agent, peticiones y si están activos (últimos 5 min)
 curl -u admin:… http://127.0.0.1:5178/api/keys
 # Revocar
