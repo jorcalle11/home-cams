@@ -115,7 +115,7 @@ export function useKvsStream(camera, { enabled, substream }) {
             else pending.push(payload);
           }
         } catch (err) {
-          console.error(`[${camera.name}] señalización:`, err);
+          console.error(`[${camera.name}] signaling:`, err);
           fail(err.message);
         }
       };

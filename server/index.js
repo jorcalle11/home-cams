@@ -29,13 +29,13 @@ app.get("/api/keys", login, (_req, res) => {
 // The key is only ever returned here; the server keeps just its hash.
 app.post("/api/keys", login, (req, res) => {
   const name = String(req.body?.name || "").trim().slice(0, 80);
-  if (!name) return res.status(400).json({ error: "Falta name" });
+  if (!name) return res.status(400).json({ error: "Missing name" });
   const kind = req.body?.kind === "web" ? "web" : "app";
   res.status(201).json(createClient(name, kind)); // { client, key }
 });
 
 app.delete("/api/keys/:id", login, (req, res) => {
-  if (!revokeClient(req.params.id)) return res.status(404).json({ error: "No existe" });
+  if (!revokeClient(req.params.id)) return res.status(404).json({ error: "Not found" });
   res.sendStatus(204);
 });
 
@@ -48,13 +48,13 @@ app.get("/api/cameras", route(async (_req, res) => {
 
 app.get("/api/cameras/:mac/stream", route(async (req, res) => {
   const { model, substream } = req.query;
-  if (!model) return res.status(400).json({ error: "Falta model" });
+  if (!model) return res.status(400).json({ error: "Missing model" });
   res.json(await getStream(req.params.mac, model, substream === "true"));
 }));
 
 app.post("/api/cameras/:mac/power", route(async (req, res) => {
   const { model, on } = req.body || {};
-  if (!model || typeof on !== "boolean") return res.status(400).json({ error: "Faltan model u on" });
+  if (!model || typeof on !== "boolean") return res.status(400).json({ error: "Missing model or on" });
   await setPower(req.params.mac, model, on);
   res.json({ on });
 }));
@@ -76,4 +76,4 @@ if (process.env.NODE_ENV === "production") {
 
 const host = process.env.HOST || "127.0.0.1";
 const port = Number(process.env.PORT || 5178);
-app.listen(port, host, () => console.log(`API en http://${host}:${port}`));
+app.listen(port, host, () => console.log(`API running on http://${host}:${port}`));

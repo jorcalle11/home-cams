@@ -50,9 +50,10 @@ export function getStream(mac, model, substream) {
 
 export async function setPower(mac, model, on) {
   const res = await wyze.runAction(mac, model, on ? "power_on" : "power_off");
-  if (String(res?.code) !== "1") throw new Error(`Wyze rechazó el cambio (${res?.code} ${res?.msg || ""})`);
+  if (String(res?.code) !== "1") throw new Error(`Wyze rejected the change (${res?.code} ${res?.msg || ""})`);
 }
 
+// Labels shown in the UI, so they stay in Spanish.
 const AI_TAGS = { 101: "Persona", 102: "Vehículo", 103: "Mascota", 104: "Paquete" };
 const ALARM_TYPES = { 1: "Movimiento", 2: "Sonido" };
 

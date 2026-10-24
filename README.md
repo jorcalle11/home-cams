@@ -79,7 +79,7 @@ npm start       # http://127.0.0.1:5178 (HOST:PORT del .env)
 
 ```bash
 npm run docker:up     # construye la imagen y levanta el contenedor
-npm run docker:logs   # logs en vivo; debe decir "API en http://0.0.0.0:5178"
+npm run docker:logs   # logs en vivo; debe decir "API running on http://0.0.0.0:5178"
 npm run docker:down   # detiene el contenedor
 ```
 
