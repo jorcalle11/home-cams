@@ -13,7 +13,7 @@
     "docker:logs": "docker compose logs -f"
   },
   "engines": {
-    "node": ">=20 <24.18"
+    "node": ">=22.13 <24.18"
   },
   "dependencies": {
     "express": "^4.22.3",

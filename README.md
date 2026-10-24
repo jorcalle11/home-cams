@@ -16,7 +16,7 @@ el video va directo del navegador a Wyze sin pasar por el servidor.
 
 - Cuenta Wyze con **Key ID** y **API Key** generados en https://developer-api-console.wyze.com
   (con la misma cuenta).
-- **Sin Docker:** Node.js 20 o 22 (Node >= 24.18 rompe TLS con algunos hosts de Wyze).
+- **Sin Docker:** Node.js 22.13 o superior (usa `node:sqlite`) y menor que 24.18 (Node >= 24.18 rompe TLS con algunos hosts de Wyze).
 - **Con Docker:** Docker con Docker Compose v2.
 
 ## Configuración
@@ -33,8 +33,27 @@ Completa en `.env`:
 | `WYZE_KEY_ID`, `WYZE_API_KEY` | Credenciales de la API de Wyze |
 | `HOST`, `PORT` | Dónde escucha la app (por defecto `127.0.0.1:5178`) |
 | `APP_USERNAME`, `APP_PASSWORD` | Login de la app. Obligatorio en producción y en Docker |
-| `API_TOKEN` | Opcional. Token para que otras apps (p. ej. una app de TV) usen el API con `Authorization: Bearer <token>` |
 | `CORS_ORIGINS` | Opcional. Orígenes que pueden llamar a `/api` desde un navegador: `*` o una lista separada por comas (`null` = apps abiertas desde `file://`) |
+
+## API y API keys
+
+El API (`/api/cameras`, `/api/cameras/:mac/stream`, `/api/events`, `/api/cameras/:mac/power`) pide una
+**API key por cliente**: `Authorization: Bearer <key>`. La web también usa la suya: cada navegador crea
+la propia la primera vez (con el login de la app) y aparece como cliente "Web · Chrome en macOS".
+
+Las claves se gestionan con el login de la app (`APP_USERNAME` / `APP_PASSWORD`):
+
+```bash
+# Crear una clave (se muestra una sola vez; el servidor solo guarda su hash)
+curl -u admin:… -H 'Content-Type: application/json' -d '{"name":"TV sala"}' http://127.0.0.1:5178/api/keys
+# Clientes: último uso, IP, user agent, peticiones y si están activos (últimos 5 min)
+curl -u admin:… http://127.0.0.1:5178/api/keys
+# Revocar
+curl -u admin:… -X DELETE http://127.0.0.1:5178/api/keys/<id>
+```
+
+Los clientes se guardan en SQLite (`.wyze/home-cams.db`, en el mismo volumen que el token de Wyze).
+Para apps servidas desde otro origen (p. ej. una app de TV abierta desde `file://`), configura `CORS_ORIGINS`.
 
 ## Ejecutar sin Docker
 

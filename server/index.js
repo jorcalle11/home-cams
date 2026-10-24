@@ -1,15 +1,18 @@
 import express from "express";
 import { fileURLToPath } from "node:url";
 import { listCamerasAndGroups, getStream, listEvents, setPower } from "./wyze.js";
-import { basicAuth, cors } from "./auth.js";
+import { basicAuth, apiKeyAuth, cors } from "./auth.js";
+import { listClients, createClient, revokeClient } from "./clients.js";
 
 const app = express();
 app.disable("x-powered-by");
+// Behind Caddy on a private network: take the client's IP from X-Forwarded-For.
+app.set("trust proxy", "loopback, uniquelocal");
 // No auth and no data: used by the Docker healthcheck.
 app.get("/healthz", (_req, res) => res.json({ ok: true }));
 app.use("/api", cors());
-app.use(basicAuth());
 app.use(express.json());
+const login = basicAuth();
 const route = (fn) => (req, res) =>
   fn(req, res).catch((err) => {
     // Trim: some wyze-api errors include signed URLs and TURN credentials.
@@ -17,6 +20,27 @@ const route = (fn) => (req, res) =>
     console.error(`[${req.method} ${req.path}]`, msg);
     res.status(502).json({ error: msg });
   });
+
+// ---- API keys: one per client (app or browser). Managed with the app login. ----
+app.get("/api/keys", login, (_req, res) => {
+  res.json({ clients: listClients() });
+});
+
+// The key is only ever returned here; the server keeps just its hash.
+app.post("/api/keys", login, (req, res) => {
+  const name = String(req.body?.name || "").trim().slice(0, 80);
+  if (!name) return res.status(400).json({ error: "Falta name" });
+  const kind = req.body?.kind === "web" ? "web" : "app";
+  res.status(201).json(createClient(name, kind)); // { client, key }
+});
+
+app.delete("/api/keys/:id", login, (req, res) => {
+  if (!revokeClient(req.params.id)) return res.status(404).json({ error: "No existe" });
+  res.sendStatus(204);
+});
+
+// ---- Data API: every request needs an API key ----
+app.use("/api", apiKeyAuth());
 
 app.get("/api/cameras", route(async (_req, res) => {
   res.json(await listCamerasAndGroups());
@@ -42,6 +66,8 @@ app.get("/api/events", route(async (req, res) => {
   res.json(await listEvents({ macs, begin, end })); // { events, next }
 }));
 
+// ---- Web page: the app login ----
+app.use(login);
 if (process.env.NODE_ENV === "production") {
   const dist = fileURLToPath(new URL("../dist/", import.meta.url));
   app.use(express.static(dist));

@@ -1,13 +1,16 @@
 import crypto from "node:crypto";
+import { useKey } from "./clients.js";
 
-// HTTP Basic auth. Required in production unless AUTH_DISABLED=true
-// (e.g. when a proxy in front already authenticates).
-// API_TOKEN, when set, also lets other apps (e.g. a TV app) call the API with
-// "Authorization: Bearer <token>" instead of the app login.
+// Two kinds of access:
+// - The app login (HTTP Basic): the web page and API key management (/api/keys).
+//   Required in production unless AUTH_DISABLED=true (e.g. a proxy in front already authenticates).
+// - API keys ("Authorization: Bearer <key>"): the data API. Every consumer, the web included,
+//   uses its own key, so each one is registered (see clients.js).
 const user = process.env.APP_USERNAME;
 const pass = process.env.APP_PASSWORD;
-const token = process.env.API_TOKEN;
 const disabled = process.env.AUTH_DISABLED === "true";
+// Local development without credentials: nothing is enforced.
+const open = disabled || (!user && !pass && process.env.NODE_ENV !== "production");
 
 const digest = (v) => crypto.createHash("sha256").update(v).digest();
 const safeEqual = (a, b) => crypto.timingSafeEqual(digest(a), digest(b));
@@ -24,7 +27,7 @@ export function cors() {
       res.set({
         "Access-Control-Allow-Origin": origins.includes("*") ? "*" : origin,
         "Access-Control-Allow-Headers": "Authorization, Content-Type",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
         "Access-Control-Max-Age": "600",
         Vary: "Origin",
       });
@@ -48,9 +51,19 @@ export function basicAuth() {
   }
   return (req, res, next) => {
     const [scheme, encoded = ""] = (req.headers.authorization || "").split(" ");
-    if (scheme === "Bearer" && token && safeEqual(encoded, token)) return next();
     const [u, ...rest] = Buffer.from(encoded, "base64").toString().split(":");
     if (scheme === "Basic" && safeEqual(u, user) && safeEqual(rest.join(":"), pass)) return next();
     res.set("WWW-Authenticate", 'Basic realm="Home Cams", charset="UTF-8"').status(401).send("Autenticación requerida");
+  };
+}
+
+// Data API: a valid API key, recorded as that client's latest use (req.client).
+// No WWW-Authenticate header: a missing key must not pop up the browser's login dialog.
+export function apiKeyAuth() {
+  return (req, res, next) => {
+    const [scheme, key = ""] = (req.headers.authorization || "").split(" ");
+    req.client = scheme === "Bearer" ? useKey(key, req) : null;
+    if (req.client || open) return next();
+    res.status(401).json({ error: "API key inválida o ausente" });
   };
 }
