@@ -4,16 +4,16 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n api,web -c blue,green \"node --watch --env-file=.env server/index.js\" \"vite\"",
+    "dev": "concurrently -k -n api,web -c blue,green \"node --disable-warning=ExperimentalWarning --watch --env-file=.env server/index.js\" \"vite\"",
     "build": "vite build",
-    "start": "NODE_ENV=production node --env-file=.env server/index.js",
-    "check": "node --env-file=.env server/check.js",
-    "docker:up": "docker compose up -d --build",
-    "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
+    "start": "NODE_ENV=production node --disable-warning=ExperimentalWarning --env-file=.env server/index.js",
+    "test": "node --disable-warning=ExperimentalWarning --test \"server/test/**/*.test.js\"",
+    "test:watch": "node --disable-warning=ExperimentalWarning --test --watch \"server/test/**/*.test.js\"",
+    "check": "node --disable-warning=ExperimentalWarning --env-file=.env server/scripts/check.js",
+    "dev-docker": "docker compose up --build --renew-anon-volumes"
   },
   "engines": {
-    "node": ">=20 <24.18"
+    "node": ">=22.13 <24.18"
   },
   "dependencies": {
     "express": "^4.22.3",

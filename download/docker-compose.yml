@@ -1,6 +1,6 @@
-# Wyze camera viewer: live WebRTC video/audio, events by day, groups, power control.
-# Production install — pulls the published image only (no git clone, no local build).
-# Configure via .env (see .env.example).
+# Home Cams: Wyze camera viewer (live WebRTC video and audio, events by day, groups, power control).
+# Production: runs the published image, with no git clone or local build.
+# Settings come from .env (see .env.example); HOST and API_PORT are required.
 
 name: home-cams
 
@@ -10,19 +10,32 @@ services:
     container_name: home-cams
     restart: unless-stopped
     env_file: .env
-    # Inside the container it listens on 0.0.0.0:PORT. HOST must stay 0.0.0.0 here (overrides
-    # env_file): with 127.0.0.1 Docker can't forward traffic into the container.
     environment:
       NODE_ENV: production
+      # Inside the container the server listens on every interface, or Docker can't forward
+      # traffic to it. .env's HOST only picks where the port is published on the server.
       HOST: 0.0.0.0
-      PORT: ${PORT:-5178}
-    # HOST and PORT from .env: host address and port where the app is published.
     ports:
-      - "${HOST:-127.0.0.1}:${PORT:-5178}:${PORT:-5178}"
+      - "${HOST:?set HOST in .env}:${API_PORT:?set API_PORT in .env}:${API_PORT}"
     volumes:
-      # Wyze auth token, so restarts don't force a new login (Wyze rate-limits logins).
-      # Named volume: inherits the image's ownership (container runs as uid 1000).
+      # Wyze token and the SQLite database (the user, sessions and API keys): back it up.
+      # Named volume: inherits the image's ownership (the container runs as uid 1000).
       - wyze-token:/app/.wyze
+
+    # Hardening: the only writable paths are the volume and /tmp; no Linux capabilities
+    # (it only binds an unprivileged port) and no privilege escalation.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 200
+    # Runs node under an init process: SIGTERM reaches it, so `docker compose down` is immediate.
+    init: true
+
+    # The healthcheck is in the image (GET /healthz); `docker compose ps` shows "healthy".
     logging:
       driver: json-file
       options:

@@ -1,6 +1,8 @@
 // Verifies credentials and access: `npm run check`
 // Only prints trimmed error messages: axios errors include the full request (credentials).
-import { wyze, listCameras, listEvents, getStream } from "./wyze.js";
+import { wyze } from "../wyze/client.js";
+import { listCameras, getStream } from "../features/cameras/cameras.service.js";
+import { listEvents } from "../features/events/events.service.js";
 
 function summarize(err) {
   const data = err.response?.data;
@@ -18,18 +20,18 @@ async function step(label, fn) {
 }
 
 await step("Login", () => wyze.maybeLogin());
-console.log("✓ Login correcto");
+console.log("✓ Login OK");
 
-const cams = await step("Cámaras", listCameras);
-console.log(`✓ ${cams.length} cámara(s):`);
-for (const c of cams) console.log(`   - ${c.name} [${c.model}] fw ${c.firmware} ${c.online ? "online" : "OFFLINE"}${c.on ? "" : " (APAGADA)"}`);
+const cams = await step("Cameras", listCameras);
+console.log(`✓ ${cams.length} camera(s):`);
+for (const c of cams) console.log(`   - ${c.name} [${c.model}] fw ${c.firmware} ${c.online ? "online" : "OFFLINE"}${c.on ? "" : " (OFF)"}`);
 
-const { events } = await step("Eventos", () => listEvents({ begin: Date.now() - 86400000, end: Date.now() }));
-console.log(`✓ ${events.length} evento(s) en las últimas 24h`);
+const { events } = await step("Events", () => listEvents({ begin: Date.now() - 86400000, end: Date.now() }));
+console.log(`✓ ${events.length} event(s) in the last 24h`);
 for (const e of events.slice(0, 5)) console.log(`   - ${new Date(e.ts).toLocaleString()} ${e.mac} ${e.type} ${e.tags.join(",")} img:${!!e.image} video:${!!e.video}`);
 
 const cam = cams.find((c) => c.online && c.on);
 if (cam) {
   const s = await step("Streaming", () => getStream(cam.mac, cam.model, false));
-  console.log(`✓ Credenciales WebRTC para "${cam.name}" (${s.iceServers.length} ICE servers)`);
+  console.log(`✓ WebRTC credentials for "${cam.name}" (${s.iceServers.length} ICE servers)`);
 }
