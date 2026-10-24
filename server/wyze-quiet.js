@@ -14,5 +14,8 @@ util.wyzeDecrypt = (...args) => {
   console.log = () => {};
   try { return decrypt(...args); } finally { console.log = log; }
 };
+// wyze-api loads aws-sdk v2, which prints an end-of-support notice on startup. The notice is
+// emitted on the next tick, so turning it off here (after the import) is enough.
+createRequire(createRequire(import.meta.url).resolve("wyze-api"))("aws-sdk/lib/maintenance_mode_message").suppress = true;
 
 export { Wyze };

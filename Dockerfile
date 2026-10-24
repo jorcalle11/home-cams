@@ -20,4 +20,5 @@ USER node
 EXPOSE 5178
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
   CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||5178)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
-CMD ["node", "server/index.js"]
+# node:sqlite is still experimental in Node 22; hide its startup warning.
+CMD ["node", "--disable-warning=ExperimentalWarning", "server/index.js"]
