@@ -51,6 +51,17 @@ Abre `http://HOST:API_PORT` (p. ej. http://127.0.0.1:5178). La primera vez muest
 Con `127.0.0.1` la app solo es accesible desde el servidor: para usarla desde otros equipos publícala con
 un proxy con HTTPS (Caddy, nginx). Sin HTTPS la contraseña viaja en claro.
 
+El contenedor corre como usuario sin privilegios, con el sistema de archivos de solo lectura y sin capabilities
+de Linux; solo escribe en el volumen `home-cams_wyze-token`.
+
+## Copia de seguridad
+
+El volumen guarda el token de Wyze y la base de datos (el usuario, las sesiones y las API keys):
+
+```bash
+docker run --rm -v home-cams_wyze-token:/data -v "$PWD":/backup alpine tar czf /backup/home-cams-data.tgz -C /data .
+```
+
 ## Actualizar
 
 ```bash
