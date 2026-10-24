@@ -81,6 +81,18 @@ npm run build
 npm start       # http://127.0.0.1:5178 (HOST:API_PORT del .env)
 ```
 
+## Tests
+
+Tests del servidor con el runner de Node (`node:test`), sin dependencias extra:
+
+```bash
+npm test             # una vez
+npm run test:watch   # vuelve a ejecutarlos al guardar (para TDD)
+```
+
+Están en `server/test/`: levantan la app en un puerto aleatorio con una base de datos temporal (nunca tocan
+`.wyze/`) y simulan las llamadas a Wyze. GitHub Actions los ejecuta antes de construir la imagen.
+
 ## Ejecutar con Docker
 
 El `Dockerfile` tiene varias etapas: `dev` (todas las dependencias; el código se monta desde el host)

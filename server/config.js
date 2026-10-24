@@ -1,3 +1,4 @@
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Every setting comes from the environment (.env). This is the only module that reads it.
@@ -17,7 +18,8 @@ export const config = {
     logLevel: env.WYZE_LOG_LEVEL || "none",
   },
   // Wyze token and the SQLite database. Docker keeps this directory in a volume.
-  dataDir: fileURLToPath(new URL("../.wyze/", import.meta.url)),
+  // DATA_DIR moves it (the tests use a temporary one); it isn't meant for .env.
+  dataDir: env.DATA_DIR ? path.resolve(env.DATA_DIR) + path.sep : fileURLToPath(new URL("../.wyze/", import.meta.url)),
   // The built web app, served in production.
   distDir: fileURLToPath(new URL("../dist/", import.meta.url)),
 };

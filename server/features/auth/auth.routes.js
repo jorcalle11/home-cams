@@ -2,7 +2,7 @@ import { Router } from "express";
 import { asyncRoute } from "../../middleware/async-route.js";
 import { getUser, signup, checkCredentials, createSession, isValidSession, deleteSession } from "./auth.service.js";
 import { readSessionToken, setSessionCookie, clearSessionCookie } from "./session-cookie.js";
-import { isLimited, recordFailure, clearFailures } from "./login-limiter.js";
+import { loginLimiter } from "./login-limiter.js";
 
 export const authRouter = Router();
 
@@ -26,14 +26,14 @@ authRouter.post("/signup", asyncRoute(async (req, res) => {
 }));
 
 authRouter.post("/login", asyncRoute(async (req, res) => {
-  if (isLimited(req.ip)) return res.status(429).json({ error: "Too many failed attempts, try again later" });
+  if (loginLimiter.isLimited(req.ip)) return res.status(429).json({ error: "Too many failed attempts, try again later" });
   const username = String(req.body?.username || "").trim();
   const password = String(req.body?.password || "");
   if (!(await checkCredentials(username, password))) {
-    recordFailure(req.ip);
+    loginLimiter.recordFailure(req.ip);
     return res.status(401).json({ error: "Invalid username or password" });
   }
-  clearFailures(req.ip);
+  loginLimiter.clearFailures(req.ip);
   setSessionCookie(req, res, createSession());
   res.json({ user: getUser() });
 }));
