@@ -8,7 +8,7 @@ import { useTheme } from "./useTheme.js";
 const THEME_LABEL = { system: "🖥 Sistema", light: "☀️ Claro", dark: "🌙 Oscuro" };
 const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
-export default function App() {
+export default function App({ user, onLogout }) {
   const [params, setParams, goHome] = useUrlState();
   const [theme, cycleTheme] = useTheme();
   const [data, setData] = useState(null); // { cameras, groups }
@@ -61,6 +61,7 @@ export default function App() {
             </div>
           )}
           <button onClick={cycleTheme} title="Tema (clic para cambiar)">{THEME_LABEL[theme]}</button>
+          <button onClick={onLogout} title={`Sesión de ${user.username}`}>Salir</button>
         </nav>
       </header>
 

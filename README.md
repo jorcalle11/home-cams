@@ -33,27 +33,32 @@ Completa en `.env`:
 | `WYZE_KEY_ID`, `WYZE_API_KEY` | Credenciales de la API de Wyze |
 | `HOST`, `API_PORT` | Dónde escucha la app, p. ej. `127.0.0.1` y `5178` (obligatorios) |
 | `UI_PORT` | Puerto de Vite en desarrollo, p. ej. `5173` (obligatorio para `npm run dev`) |
-| `APP_USERNAME`, `APP_PASSWORD` | Login de la app. Obligatorio en producción y en Docker |
 | `CORS_ORIGINS` | Opcional. Orígenes que pueden llamar a `/api` desde un navegador: `*` o una lista separada por comas (`null` = apps abiertas desde `file://`) |
+
+## Login
+
+La primera vez que abres la app muestra un **registro**: el usuario que crees es el único que puede entrar
+(no se pueden crear más). Después pide **iniciar sesión**; la sesión dura 30 días (cookie `HttpOnly`) y se cierra
+con "Salir". Tras 10 intentos fallidos desde una IP, el login se bloquea 15 minutos.
 
 ## API y API keys
 
-El API (`/api/cameras`, `/api/cameras/:mac/stream`, `/api/events`, `/api/cameras/:mac/power`) pide una
-**API key por cliente**: `Authorization: Bearer <key>`. La web también usa la suya: cada navegador crea
-la propia la primera vez (con el login de la app) y aparece como cliente "Web · Chrome en macOS".
+El API (`/api/cameras`, `/api/cameras/:mac/stream`, `/api/events`, `/api/cameras/:mac/power`) acepta la sesión
+de la web o una **API key por cliente** (`Authorization: Bearer <key>`), para otras apps como una de TV.
 
-Las claves se gestionan con el login de la app (`APP_USERNAME` / `APP_PASSWORD`):
+Las claves se gestionan con la sesión de la web. Desde la terminal, inicia sesión guardando la cookie:
 
 ```bash
+curl -c cookies.txt -H 'Content-Type: application/json' -d '{"username":"…","password":"…"}' http://127.0.0.1:5178/api/auth/login
 # Crear una clave (se muestra una sola vez; el servidor solo guarda su hash)
-curl -u admin:… -H 'Content-Type: application/json' -d '{"name":"LG TV 60UQ8050PSB"}' http://127.0.0.1:5178/api/keys
+curl -b cookies.txt -H 'Content-Type: application/json' -d '{"name":"LG TV 60UQ8050PSB"}' http://127.0.0.1:5178/api/keys
 # Clientes: último uso, IP, user agent, peticiones y si están activos (últimos 5 min)
-curl -u admin:… http://127.0.0.1:5178/api/keys
+curl -b cookies.txt http://127.0.0.1:5178/api/keys
 # Revocar
-curl -u admin:… -X DELETE http://127.0.0.1:5178/api/keys/<id>
+curl -b cookies.txt -X DELETE http://127.0.0.1:5178/api/keys/<id>
 ```
 
-Los clientes se guardan en SQLite (`.wyze/home-cams.db`, en el mismo volumen que el token de Wyze).
+El usuario, las sesiones y los clientes se guardan en SQLite (`.wyze/home-cams.db`, en el mismo volumen que el token de Wyze).
 Para apps servidas desde otro origen (p. ej. una app de TV abierta desde `file://`), configura `CORS_ORIGINS`.
 
 ## Ejecutar sin Docker
@@ -119,8 +124,8 @@ necesario para ejecutarla en el servidor desde el registry.
   `/api/events` y `/healthz`. Organizado por funcionalidad:
   - `index.js` arranca el servidor; `app.js` arma Express (el orden de los middlewares importa);
     `config.js` es el único lugar que lee las variables de entorno; `db.js` abre SQLite.
-  - `features/<keys|cameras|events>/`: cada una con sus rutas (`*.routes.js`) y su lógica (`*.service.js`).
-  - `middleware/`: login, API keys, CORS y el manejo de errores de Wyze.
+  - `features/<auth|keys|cameras|events>/`: cada una con sus rutas (`*.routes.js`) y su lógica (`*.service.js`).
+  - `middleware/`: sesión o API key, CORS y el manejo de errores de Wyze.
   - `wyze/`: el cliente de Wyze y los parches que silencian `wyze-api`.
   - `scripts/check.js`: lo que ejecuta `npm run check`.
 - `web/` (React + Vite): el navegador recibe una URL de señalización pre-firmada de Amazon Kinesis Video

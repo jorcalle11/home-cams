@@ -1,13 +1,14 @@
 import express from "express";
 import { config } from "./config.js";
 import { cors } from "./middleware/cors.js";
-import { basicAuth, apiKeyAuth } from "./middleware/auth.js";
+import { requireSession, requireSessionOrApiKey } from "./middleware/auth.js";
+import { authRouter } from "./features/auth/auth.routes.js";
 import { keysRouter } from "./features/keys/keys.routes.js";
 import { camerasRouter } from "./features/cameras/cameras.routes.js";
 import { eventsRouter } from "./features/events/events.routes.js";
 
-// The order matters: health check, CORS, the login-protected key management, the API-key
-// protected data API and, last, the login-protected web page.
+// The order matters: health check, CORS, the public auth endpoints, the session-protected key
+// management, the data API (session or API key) and, last, the web page.
 export function createApp() {
   const app = express();
   app.disable("x-powered-by");
@@ -18,16 +19,15 @@ export function createApp() {
   app.use("/api", cors());
   app.use(express.json());
 
-  const login = basicAuth();
-  app.use("/api/keys", login, keysRouter);
+  app.use("/api/auth", authRouter);
+  app.use("/api/keys", requireSession(), keysRouter);
 
-  // Data API: every request needs an API key.
-  app.use("/api", apiKeyAuth());
+  // Data API: the web's session or another client's API key.
+  app.use("/api", requireSessionOrApiKey());
   app.use("/api/cameras", camerasRouter);
   app.use("/api/events", eventsRouter);
 
-  // Web page: the app login.
-  app.use(login);
+  // Web page: public, it has no data of its own; the app shows its login page.
   if (config.isProduction) {
     app.use(express.static(config.distDir));
     app.get("*", (_req, res) => res.sendFile(config.distDir + "index.html"));

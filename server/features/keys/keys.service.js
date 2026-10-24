@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { db } from "../../db.js";
 
-// API clients: each app or browser that calls the API has its own key, so every consumer
+// API clients: each other app that calls the API has its own key, so every consumer
 // is registered and can be revoked on its own. Only a SHA-256 of each key is stored; the key
 // itself is returned once, when it's created.
 
@@ -15,7 +15,7 @@ const q = {
   get: db.prepare("SELECT * FROM clients WHERE id = ?"),
   byHash: db.prepare("SELECT * FROM clients WHERE key_hash = ?"),
   insert: db.prepare(
-    "INSERT INTO clients (id, name, kind, key_hash, prefix, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+    "INSERT INTO clients (id, name, key_hash, prefix, created_at) VALUES (?, ?, ?, ?, ?)",
   ),
   remove: db.prepare("DELETE FROM clients WHERE id = ?"),
   touch: db.prepare(
@@ -27,7 +27,6 @@ function toPublic(row) {
   return {
     id: row.id,
     name: row.name,
-    kind: row.kind,
     prefix: row.prefix,
     createdAt: row.created_at,
     lastUsedAt: row.last_used_at,
@@ -42,10 +41,10 @@ export function listClients() {
   return q.list.all().map(toPublic);
 }
 
-export function createClient(name, kind = "app") {
+export function createClient(name) {
   const key = `hc_${crypto.randomBytes(24).toString("base64url")}`;
   const id = crypto.randomUUID();
-  q.insert.run(id, name, kind, hash(key), key.slice(0, 7), Date.now());
+  q.insert.run(id, name, hash(key), key.slice(0, 7), Date.now());
   return { client: toPublic(q.get.get(id)), key };
 }
 

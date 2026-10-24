@@ -1,4 +1,4 @@
-// Wraps an async handler that calls Wyze: a failure becomes a 502 with a trimmed message.
+// Wraps an async handler (most call Wyze): a failure becomes a 502 with a trimmed message.
 // Trimmed because some wyze-api errors include signed URLs and TURN credentials.
 export const asyncRoute = (fn) => (req, res) =>
   fn(req, res).catch((err) => {

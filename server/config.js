@@ -7,12 +7,6 @@ export const config = {
   isProduction: env.NODE_ENV === "production",
   host: env.HOST,
   port: env.API_PORT ? Number(env.API_PORT) : undefined,
-  auth: {
-    username: env.APP_USERNAME,
-    password: env.APP_PASSWORD,
-    // Only if a proxy in front already authenticates.
-    disabled: env.AUTH_DISABLED === "true",
-  },
   // "*" or a comma-separated list; a webOS/Tizen app opened from file:// sends "null".
   corsOrigins: (env.CORS_ORIGINS || "").split(",").map((o) => o.trim()).filter(Boolean),
   wyze: {

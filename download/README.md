@@ -27,7 +27,6 @@ Completa en `.env`:
 |---|---|
 | `WYZE_EMAIL`, `WYZE_PASSWORD` | Cuenta Wyze |
 | `WYZE_KEY_ID`, `WYZE_API_KEY` | Credenciales de la API de Wyze |
-| `APP_USERNAME`, `APP_PASSWORD` | Login de la app (obligatorio; usa una contraseña larga) |
 | `HOST`, `API_PORT` | Dónde se publica, p. ej. `127.0.0.1` y `5178` (obligatorios) |
 
 ## 3. Acceso al registry (solo si el paquete es privado)
@@ -47,7 +46,7 @@ docker compose up -d
 docker compose ps        # STATUS debe pasar a "healthy"
 ```
 
-Abre `http://HOST:API_PORT` (p. ej. http://127.0.0.1:5178) e inicia sesión con `APP_USERNAME` / `APP_PASSWORD`.
+Abre `http://HOST:API_PORT` (p. ej. http://127.0.0.1:5178). La primera vez muestra un registro: el usuario que crees será el único que puede entrar (hazlo antes de exponer la app).
 
 Con `127.0.0.1` la app solo es accesible desde el servidor: para usarla desde otros equipos publícala con
 un proxy con HTTPS (Caddy, nginx). Sin HTTPS la contraseña viaja en claro.
@@ -68,7 +67,6 @@ docker compose down
 
 | Síntoma | Causa |
 |---|---|
-| Se reinicia en bucle: `Faltan APP_USERNAME y APP_PASSWORD` | Completa ambos en `.env` |
 | `Invalid credentials ... (errorCode 1000)` | Email, contraseña o key de Wyze incorrectos (o Key ID y API Key invertidos) |
 | `Rate Limited` | Demasiados logins seguidos; espera unos 10 minutos |
 | `denied` / `unauthorized` al hacer `pull` | Falta el `docker login ghcr.io` del paso 3 |
