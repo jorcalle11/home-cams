@@ -116,7 +116,13 @@ necesario para ejecutarla en el servidor desde el registry.
 
 - `server/` (Express + [`wyze-api`](https://github.com/jfarmer08/wyze-api)): hace login en Wyze, guarda el
   token en `.wyze/` y expone `/api/cameras`, `/api/cameras/:mac/stream`, `/api/cameras/:mac/power`,
-  `/api/events` y `/healthz`.
+  `/api/events` y `/healthz`. Organizado por funcionalidad:
+  - `index.js` arranca el servidor; `app.js` arma Express (el orden de los middlewares importa);
+    `config.js` es el único lugar que lee las variables de entorno; `db.js` abre SQLite.
+  - `features/<keys|cameras|events>/`: cada una con sus rutas (`*.routes.js`) y su lógica (`*.service.js`).
+  - `middleware/`: login, API keys, CORS y el manejo de errores de Wyze.
+  - `wyze/`: el cliente de Wyze y los parches que silencian `wyze-api`.
+  - `scripts/check.js`: lo que ejecuta `npm run check`.
 - `web/` (React + Vite): el navegador recibe una URL de señalización pre-firmada de Amazon Kinesis Video
   Streams y negocia WebRTC directamente con la cámara (el mismo camino que usa view.wyze.com). El video
   no pasa por el servidor.

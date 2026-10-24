@@ -4,7 +4,7 @@ import crypto from "node:crypto";
 
 // wyze-api logs the password hash to the console (and the hash works as a credential).
 // Replace those functions on the shared module with silent versions.
-// Import Wyze from here (not directly from "wyze-api") so the patch is always applied.
+// Import Wyze from here (not directly from "wyze-api") so the patch is always applied (see client.js).
 const util = createRequire(import.meta.url)("wyze-api/src/util.js");
 const md5 = (v) => crypto.createHash("md5").update(v).digest("hex");
 util.createPassword = (password) => md5(md5(md5(password)));

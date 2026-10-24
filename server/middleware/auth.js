@@ -1,41 +1,18 @@
 import crypto from "node:crypto";
-import { useKey } from "./clients.js";
+import { config } from "../config.js";
+import { useKey } from "../features/keys/keys.service.js";
 
 // Two kinds of access:
 // - The app login (HTTP Basic): the web page and API key management (/api/keys).
 //   Required in production unless AUTH_DISABLED=true (e.g. a proxy in front already authenticates).
 // - API keys ("Authorization: Bearer <key>"): the data API. Every consumer, the web included,
-//   uses its own key, so each one is registered (see clients.js).
-const user = process.env.APP_USERNAME;
-const pass = process.env.APP_PASSWORD;
-const disabled = process.env.AUTH_DISABLED === "true";
+//   uses its own key, so each one is registered (see features/keys).
+const { username: user, password: pass, disabled } = config.auth;
 // Local development without credentials: nothing is enforced.
-const open = disabled || (!user && !pass && process.env.NODE_ENV !== "production");
+const open = disabled || (!user && !pass && !config.isProduction);
 
 const digest = (v) => crypto.createHash("sha256").update(v).digest();
 const safeEqual = (a, b) => crypto.timingSafeEqual(digest(a), digest(b));
-
-// CORS for apps served from another origin (CORS_ORIGINS="*" or a comma-separated list;
-// a webOS/Tizen app opened from file:// sends "null"). Preflight requests are answered
-// before auth, since browsers send them without the Authorization header.
-export function cors() {
-  const origins = (process.env.CORS_ORIGINS || "").split(",").map((o) => o.trim()).filter(Boolean);
-  if (!origins.length) return (_req, _res, next) => next();
-  return (req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin && (origins.includes("*") || origins.includes(origin))) {
-      res.set({
-        "Access-Control-Allow-Origin": origins.includes("*") ? "*" : origin,
-        "Access-Control-Allow-Headers": "Authorization, Content-Type",
-        "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-        "Access-Control-Max-Age": "600",
-        Vary: "Origin",
-      });
-      if (req.method === "OPTIONS") return res.sendStatus(204);
-    }
-    next();
-  };
-}
 
 export function basicAuth() {
   if (disabled) {
@@ -43,7 +20,7 @@ export function basicAuth() {
     return (_req, _res, next) => next();
   }
   if (!user || !pass) {
-    if (process.env.NODE_ENV === "production") {
+    if (config.isProduction) {
       console.error("APP_USERNAME and APP_PASSWORD (or AUTH_DISABLED=true) must be set. Aborting.");
       process.exit(1);
     }

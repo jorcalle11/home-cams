@@ -1,29 +1,9 @@
 import crypto from "node:crypto";
-import fs from "node:fs";
-import { DatabaseSync } from "node:sqlite";
+import { db } from "../../db.js";
 
 // API clients: each app or browser that calls the API has its own key, so every consumer
 // is registered and can be revoked on its own. Only a SHA-256 of each key is stored; the key
 // itself is returned once, when it's created.
-// SQLite database next to the Wyze token, in the directory Docker already keeps in a volume.
-const dir = new URL("../.wyze/", import.meta.url).pathname;
-fs.mkdirSync(dir, { recursive: true });
-const db = new DatabaseSync(dir + "home-cams.db");
-db.exec(`
-  PRAGMA journal_mode = WAL;
-  CREATE TABLE IF NOT EXISTS clients (
-    id           TEXT PRIMARY KEY,
-    name         TEXT NOT NULL,
-    kind         TEXT NOT NULL DEFAULT 'app',  -- 'web' (a browser of the web app) or 'app'
-    key_hash     TEXT NOT NULL UNIQUE,         -- sha256 of the key
-    prefix       TEXT NOT NULL,                -- first characters of the key, to recognise it
-    created_at   INTEGER NOT NULL,             -- ms since epoch
-    last_used_at INTEGER,
-    last_ip      TEXT,
-    user_agent   TEXT,
-    requests     INTEGER NOT NULL DEFAULT 0
-  );
-`);
 
 // A client counts as "active" when it called the API in the last few minutes.
 const ACTIVE_MS = 5 * 60 * 1000;

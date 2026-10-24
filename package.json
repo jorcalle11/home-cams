@@ -7,7 +7,7 @@
     "dev": "concurrently -k -n api,web -c blue,green \"node --disable-warning=ExperimentalWarning --watch --env-file=.env server/index.js\" \"vite\"",
     "build": "vite build",
     "start": "NODE_ENV=production node --disable-warning=ExperimentalWarning --env-file=.env server/index.js",
-    "check": "node --disable-warning=ExperimentalWarning --env-file=.env server/check.js",
+    "check": "node --disable-warning=ExperimentalWarning --env-file=.env server/scripts/check.js",
     "dev-docker": "docker compose up --build --renew-anon-volumes"
   },
   "engines": {

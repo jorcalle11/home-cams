@@ -1,6 +1,8 @@
 // Verifies credentials and access: `npm run check`
 // Only prints trimmed error messages: axios errors include the full request (credentials).
-import { wyze, listCameras, listEvents, getStream } from "./wyze.js";
+import { wyze } from "../wyze/client.js";
+import { listCameras, getStream } from "../features/cameras/cameras.service.js";
+import { listEvents } from "../features/events/events.service.js";
 
 function summarize(err) {
   const data = err.response?.data;
