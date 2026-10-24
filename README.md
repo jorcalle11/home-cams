@@ -33,6 +33,8 @@ Completa en `.env`:
 | `WYZE_KEY_ID`, `WYZE_API_KEY` | Credenciales de la API de Wyze |
 | `HOST`, `PORT` | Dónde escucha la app (por defecto `127.0.0.1:5178`) |
 | `APP_USERNAME`, `APP_PASSWORD` | Login de la app. Obligatorio en producción y en Docker |
+| `API_TOKEN` | Opcional. Token para que otras apps (p. ej. una app de TV) usen el API con `Authorization: Bearer <token>` |
+| `CORS_ORIGINS` | Opcional. Orígenes que pueden llamar a `/api` desde un navegador: `*` o una lista separada por comas (`null` = apps abiertas desde `file://`) |
 
 ## Ejecutar sin Docker
 

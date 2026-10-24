@@ -1,12 +1,13 @@
 import express from "express";
 import { fileURLToPath } from "node:url";
 import { listCamerasAndGroups, getStream, listEvents, setPower } from "./wyze.js";
-import { basicAuth } from "./auth.js";
+import { basicAuth, cors } from "./auth.js";
 
 const app = express();
 app.disable("x-powered-by");
 // No auth and no data: used by the Docker healthcheck.
 app.get("/healthz", (_req, res) => res.json({ ok: true }));
+app.use("/api", cors());
 app.use(basicAuth());
 app.use(express.json());
 const route = (fn) => (req, res) =>
