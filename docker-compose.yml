@@ -1,20 +1,42 @@
+# Local development: the same two processes as `npm run dev`, one per container, with live reload.
+# The project is bind-mounted, so edits on the host apply without rebuilding.
+# Production runs the published image instead: see download/docker-compose.yml.
+
+x-dev: &dev
+  build:
+    context: .
+    target: dev
+  image: home-cams:dev
+  env_file: .env
+  volumes:
+    - .:/app
+    # Keep the container's node_modules (Linux binaries, e.g. esbuild) instead of the host's.
+    - /app/node_modules
+
 services:
-  home-cams:
-    build: .
-    image: home-cams:latest
-    container_name: home-cams
-    restart: unless-stopped
-    env_file: .env
-    # Inside the container it listens on 0.0.0.0:API_PORT. HOST must stay 0.0.0.0 here (overrides
-    # env_file): with 127.0.0.1 Docker can't forward traffic into the container.
+  # Express API with node --watch. Uses the project's .wyze, so it shares the Wyze token and
+  # API keys with `npm run dev`.
+  api:
+    <<: *dev
+    command: ["node", "--disable-warning=ExperimentalWarning", "--watch", "server/index.js"]
+    # HOST must stay 0.0.0.0 here (overrides env_file): with 127.0.0.1 Docker can't forward
+    # traffic into the container.
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       HOST: 0.0.0.0
-    # HOST and API_PORT from .env (required, no defaults): host address and port where the app is published.
+    # HOST, API_PORT and UI_PORT come from .env (required, no defaults); the ports are the same
+    # inside and outside. Published too, so other clients (e.g. a TV app) can call the API directly.
     ports:
       - "${HOST:?set HOST in .env}:${API_PORT:?set API_PORT in .env}:${API_PORT}"
-    volumes:
-      - wyze-token:/app/.wyze
 
-volumes:
-  wyze-token:
+  # Vite dev server with HMR; proxies /api to the api service.
+  web:
+    <<: *dev
+    command: ["npx", "vite"]
+    environment:
+      HOST: 0.0.0.0
+      API_PROXY_TARGET: http://api:${API_PORT}
+    ports:
+      - "${HOST}:${UI_PORT:?set UI_PORT in .env}:${UI_PORT}"
+    depends_on:
+      - api

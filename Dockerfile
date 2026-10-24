@@ -1,15 +1,29 @@
 # Node 22: Node >= 24.18 breaks TLS with some Wyze hosts (see README).
-FROM node:22-slim AS build
+FROM node:22-slim AS base
 WORKDIR /app
+
+# Development: all dependencies; the source is bind-mounted by docker-compose.yml.
+FROM base AS dev
+# Runs as node, which needs to write node_modules/.vite (Vite's cache) and .wyze.
+RUN chown node:node /app
+USER node
+COPY --chown=node:node package.json package-lock.json ./
+RUN npm ci
+# No ENV: HOST, ports and NODE_ENV come from .env and docker-compose.yml.
+CMD ["node", "--disable-warning=ExperimentalWarning", "--watch", "server/index.js"]
+
+# Builds the frontend into dist/.
+FROM base AS build
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY vite.config.js ./
 COPY web ./web
 RUN npm run build
 
-FROM node:22-slim
-# No ENV: HOST, API_PORT and NODE_ENV come from .env and docker-compose.yml.
-WORKDIR /app
+# Production (published by CI, run by download/docker-compose.yml): only runtime dependencies,
+# the server and the built frontend. Keep it last so a plain `docker build` produces this image.
+FROM base AS prod
+# No ENV: HOST, API_PORT and NODE_ENV come from .env and download/docker-compose.yml.
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY server ./server

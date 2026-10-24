@@ -78,16 +78,23 @@ npm start       # http://127.0.0.1:5178 (HOST:API_PORT del .env)
 
 ## Ejecutar con Docker
 
+El `Dockerfile` tiene varias etapas: `dev` (todas las dependencias; el código se monta desde el host)
+y `prod` (solo dependencias de runtime, el servidor y el frontend compilado). El `docker-compose.yml`
+de la raíz es para desarrollo local; producción usa la imagen publicada (ver [`download/`](download/)).
+
 ```bash
-npm run docker:up     # construye la imagen y levanta el contenedor
-npm run docker:logs   # logs en vivo; debe decir "API running on http://0.0.0.0:5178"
-npm run docker:down   # detiene el contenedor
+npm run dev-docker    # construye la imagen dev y levanta api y web con logs; Ctrl+C los detiene
 ```
 
-La app queda en `http://HOST:API_PORT` del `.env`. Si `npm run dev`
-está corriendo, usa otro puerto: `API_PORT=5179 npm run docker:up`.
+- `web`: Vite con recarga automática en `http://localhost:UI_PORT` (redirige `/api` al servicio `api`).
+- `api`: Express con `node --watch`, también publicado en `HOST:API_PORT` para probar
+  clientes externos.
 
-El token de Wyze se guarda en el volumen `home-cams_wyze-token`, así que reiniciar no fuerza un login nuevo.
+`API_PORT` y `UI_PORT` se leen del `.env` (son obligatorios) o del shell. Si `npm run dev` está corriendo, usa otros puertos:
+`API_PORT=5179 UI_PORT=5174 npm run dev-docker`.
+
+Editar el código no requiere reconstruir. Tras cambiar `package.json`, vuelve a ejecutar `npm run dev-docker`.
+Usa el `.wyze` del proyecto, así que comparte el token de Wyze y las API keys con `npm run dev`.
 
 ## Despliegue en un servidor
 

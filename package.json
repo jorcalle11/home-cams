@@ -8,9 +8,7 @@
     "build": "vite build",
     "start": "NODE_ENV=production node --disable-warning=ExperimentalWarning --env-file=.env server/index.js",
     "check": "node --disable-warning=ExperimentalWarning --env-file=.env server/check.js",
-    "docker:up": "docker compose up -d --build",
-    "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
+    "dev-docker": "docker compose up --build --renew-anon-volumes"
   },
   "engines": {
     "node": ">=22.13 <24.18"
