@@ -28,7 +28,7 @@ Completa en `.env`:
 | `WYZE_EMAIL`, `WYZE_PASSWORD` | Cuenta Wyze |
 | `WYZE_KEY_ID`, `WYZE_API_KEY` | Credenciales de la API de Wyze |
 | `APP_USERNAME`, `APP_PASSWORD` | Login de la app (obligatorio; usa una contraseña larga) |
-| `HOST`, `PORT` | Dónde se publica (por defecto `127.0.0.1:5178`) |
+| `HOST`, `API_PORT` | Dónde se publica, p. ej. `127.0.0.1` y `5178` (obligatorios) |
 
 ## 3. Acceso al registry (solo si el paquete es privado)
 
@@ -47,7 +47,7 @@ docker compose up -d
 docker compose ps        # STATUS debe pasar a "healthy"
 ```
 
-Abre `http://HOST:PORT` (por defecto http://127.0.0.1:5178) e inicia sesión con `APP_USERNAME` / `APP_PASSWORD`.
+Abre `http://HOST:API_PORT` (p. ej. http://127.0.0.1:5178) e inicia sesión con `APP_USERNAME` / `APP_PASSWORD`.
 
 Con `127.0.0.1` la app solo es accesible desde el servidor: para usarla desde otros equipos publícala con
 un proxy con HTTPS (Caddy, nginx). Sin HTTPS la contraseña viaja en claro.

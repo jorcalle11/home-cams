@@ -31,7 +31,8 @@ Completa en `.env`:
 |---|---|
 | `WYZE_EMAIL`, `WYZE_PASSWORD` | Cuenta Wyze |
 | `WYZE_KEY_ID`, `WYZE_API_KEY` | Credenciales de la API de Wyze |
-| `HOST`, `PORT` | Dónde escucha la app (por defecto `127.0.0.1:5178`) |
+| `HOST`, `API_PORT` | Dónde escucha la app, p. ej. `127.0.0.1` y `5178` (obligatorios) |
+| `UI_PORT` | Puerto de Vite en desarrollo, p. ej. `5173` (obligatorio para `npm run dev`) |
 | `APP_USERNAME`, `APP_PASSWORD` | Login de la app. Obligatorio en producción y en Docker |
 | `CORS_ORIGINS` | Opcional. Orígenes que pueden llamar a `/api` desde un navegador: `*` o una lista separada por comas (`null` = apps abiertas desde `file://`) |
 
@@ -65,14 +66,14 @@ npm run check   # verifica login, cámaras, eventos y streaming
 **Desarrollo** (recarga automática):
 
 ```bash
-npm run dev     # http://localhost:5173
+npm run dev     # http://localhost:5173 (UI_PORT del .env)
 ```
 
 **Producción local** (frontend compilado servido por el mismo servidor):
 
 ```bash
 npm run build
-npm start       # http://127.0.0.1:5178 (HOST:PORT del .env)
+npm start       # http://127.0.0.1:5178 (HOST:API_PORT del .env)
 ```
 
 ## Ejecutar con Docker
@@ -83,8 +84,8 @@ npm run docker:logs   # logs en vivo; debe decir "API running on http://0.0.0.0:
 npm run docker:down   # detiene el contenedor
 ```
 
-La app queda en `http://HOST:PORT` del `.env` (por defecto http://127.0.0.1:5178). Si `npm run dev`
-está corriendo, usa otro puerto: `PORT=5179 npm run docker:up`.
+La app queda en `http://HOST:API_PORT` del `.env`. Si `npm run dev`
+está corriendo, usa otro puerto: `API_PORT=5179 npm run docker:up`.
 
 El token de Wyze se guarda en el volumen `home-cams_wyze-token`, así que reiniciar no fuerza un login nuevo.
 

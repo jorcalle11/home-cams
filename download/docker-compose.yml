@@ -10,15 +10,14 @@ services:
     container_name: home-cams
     restart: unless-stopped
     env_file: .env
-    # Inside the container it listens on 0.0.0.0:PORT. HOST must stay 0.0.0.0 here (overrides
+    # Inside the container it listens on 0.0.0.0:API_PORT. HOST must stay 0.0.0.0 here (overrides
     # env_file): with 127.0.0.1 Docker can't forward traffic into the container.
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
-      PORT: ${PORT:-5178}
-    # HOST and PORT from .env: host address and port where the app is published.
+    # HOST and API_PORT from .env (required, no defaults): host address and port where the app is published.
     ports:
-      - "${HOST:-127.0.0.1}:${PORT:-5178}:${PORT:-5178}"
+      - "${HOST:?set HOST in .env}:${API_PORT:?set API_PORT in .env}:${API_PORT}"
     volumes:
       # Wyze auth token, so restarts don't force a new login (Wyze rate-limits logins).
       # Named volume: inherits the image's ownership (container runs as uid 1000).

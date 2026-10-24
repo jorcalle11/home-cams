@@ -74,6 +74,9 @@ if (process.env.NODE_ENV === "production") {
   app.get("*", (_req, res) => res.sendFile(dist + "index.html"));
 }
 
-const host = process.env.HOST || "127.0.0.1";
-const port = Number(process.env.PORT || 5178);
-app.listen(port, host, () => console.log(`API running on http://${host}:${port}`));
+const { HOST: host, API_PORT: port } = process.env;
+if (!host || !port) {
+  console.error("HOST and API_PORT must be set");
+  process.exit(1);
+}
+app.listen(Number(port), host, () => console.log(`API running on http://${host}:${port}`));
